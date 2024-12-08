@@ -1,17 +1,15 @@
+import { Request, Response } from 'express';
 import Joi from 'joi';
 import { connectToDatabase } from '../../utils/db.util';
 
 const schema = Joi.object({
-    dates: Joi.array().items(Joi.date().required()).min(1).required().messages({
-        'array.base': 'Dates must be an array of valid date(s)',
-        'array.min': 'At least one date must be provided',
-        'date.base': 'Each date must be a valid date',
-    }), // Array of dates for multiple slots
-    start_tm: Joi.string().required(), // Start time
-    end_tm: Joi.string().required(),   // End time
+    slot_id: Joi.number().required(),  // The slot ID to update
+    start_tm: Joi.string().required(), // New start time
+    end_tm: Joi.string().required(),   // New end time
+    date: Joi.date().required(),       // New date
 });
 
-const CreateSlot = async (req: any, res: any) => {
+const UpdateSlot = async (req: any, res: any) => {
     try {
         const db = await connectToDatabase();
 
@@ -21,50 +19,38 @@ const CreateSlot = async (req: any, res: any) => {
             return res.status(400).send(error.message);
         }
 
-        const { dates, start_tm, end_tm } = value;
+        const { slot_id, start_tm, end_tm, date } = value;
 
-        // Check if the user is a Host
-        const userId = req.user.id; // Assuming the user ID is stored in `req.user`
-        const [user]: any = await db.query('SELECT role FROM users WHERE id = ?', [userId]);
+        // Check if the slot exists
+        const [slot]: any = await db.query('SELECT * FROM slots WHERE slot_id = ?', [slot_id]);
 
-        if (user.length === 0) {
-            return res.status(404).send('User not found');
+        if (slot.length === 0) {
+            return res.status(404).send('Slot not found');
         }
 
-        if (user[0].role !== 'Host') {
-            return res.status(403).send('Only Hosts can create slots');
+        // Check if the slot is already booked
+        if (slot[0].is_booked === true) {
+            return res.status(400).send('This slot is already booked and cannot be updated');
         }
 
-        // Check if any of the slots overlap with existing ones
-        const dateConditions = dates.map((date: string) => {
-            return `(date = ? AND start_tm < ? AND end_tm > ?)`;
-        }).join(' OR ');
+        // Check if there are any bookings for this slot
+        const [bookings]: any = await db.query('SELECT * FROM bookings WHERE slot_id = ?', [slot_id]);
 
-        const query = `
-            SELECT * FROM slots WHERE (${dateConditions})
-        `;
-
-        const params = dates.flatMap((date: string) => [date, start_tm, end_tm]);
-
-        const [existingSlots]: any = await db.query(query, params);
-
-        if (existingSlots.length > 0) {
-            return res.status(400).send('One or more slots overlap with existing slots');
+        if (bookings.length > 0) {
+            return res.status(400).send('This slot has existing bookings and cannot be updated');
         }
 
-        // Insert new slots for each date
-        for (let date of dates) {
-            await db.query(
-                'INSERT INTO slots (user_id, date, start_tm, end_tm, is_booked) VALUES (?, ?, ?, ?, ?)',
-                [userId, date, start_tm, end_tm, false]
-            );
-        }
+        // Update the slot with the new values
+        await db.query(
+            'UPDATE slots SET date = ?, start_tm = ?, end_tm = ? WHERE slot_id = ?',
+            [date, start_tm, end_tm, slot_id]
+        );
 
-        return res.status(201).send('Slots created successfully');
+        return res.status(200).send('Slot updated successfully');
     } catch (error) {
         console.error(error);
         return res.status(500).send('Internal Server Error');
     }
 };
 
-export default CreateSlot;
+export default UpdateSlot;
