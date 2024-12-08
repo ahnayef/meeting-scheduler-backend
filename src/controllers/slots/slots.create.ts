@@ -32,7 +32,7 @@ const schema = Joi.object({
         }),
 });
 
-const createSlots = async (req: any, res: Response) => {
+const createSlots = async (req: any, res: any) => {
     try {
         const db = await connectToDatabase();
 
