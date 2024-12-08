@@ -18,8 +18,18 @@ const getDatesBetween = (startDate: string, endDate: string): string[] => {
 const schema = Joi.object({
     start_date: Joi.string().isoDate().required(),
     end_date: Joi.string().isoDate().required(),
-    start_tm: Joi.string().pattern(/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/).required(),
-    end_tm: Joi.string().pattern(/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/).required(),
+    start_tm: Joi.string()
+        .pattern(/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/)
+        .required()
+        .messages({
+            'string.pattern.base': 'Start time must be in 24-hour format (HH:mm or HH:mm:ss)',
+        }),
+    end_tm: Joi.string()
+        .pattern(/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/)
+        .required()
+        .messages({
+            'string.pattern.base': 'End time must be in 24-hour format (HH:mm or HH:mm:ss)',
+        }),
 });
 
 const createSlots = async (req: any, res: Response) => {
