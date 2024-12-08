@@ -6,22 +6,30 @@ import jwt from 'jsonwebtoken';
 
 require('dotenv').config();
 
+// const schema = Joi.object({
+//     role: Joi.string().valid("Host", "Guest", "Admin").required(), // Updated to include Admin
+//     name: Joi.string().min(5).required(),
+//     email: Joi.string().allow(null).optional()
+//         .pattern(/^[a-zA-Z0-9._%+-]+@neub\.edu\.bd$/)
+//         .messages({
+//             'string.pattern.base': 'Email must be a valid neub.edu.bd address',
+//         }),
+//     password: Joi.string()
+//         .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+//         .required()
+//         .messages({
+//             'string.pattern.base': 'Password must be 8+ characters with upper, lower, number, and special characters',
+//         }),
+//     bio: Joi.string().min(10).required(),
+//     photo: Joi.string().uri().required(),
+// });
+
+
 const schema = Joi.object({
     role: Joi.string().valid("Host", "Guest", "Admin").required(), // Updated to include Admin
-    name: Joi.string().min(5).required(),
-    email: Joi.string().allow(null).optional()
-        .pattern(/^[a-zA-Z0-9._%+-]+@neub\.edu\.bd$/)
-        .messages({
-            'string.pattern.base': 'Email must be a valid neub.edu.bd address',
-        }),
-    password: Joi.string()
-        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
-        .required()
-        .messages({
-            'string.pattern.base': 'Password must be 8+ characters with upper, lower, number, and special characters',
-        }),
-    bio: Joi.string().min(10).required(),
-    photo: Joi.string().uri().required(),
+    name: Joi.string().min(1).required(),
+    email: Joi.string().required(),
+    password: Joi.string().required()
 });
 
 const Register = async (req: Request, res: any) => {
