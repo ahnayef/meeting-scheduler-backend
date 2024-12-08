@@ -2,13 +2,27 @@ import { Request, Response } from "express";
 import Joi from "joi";
 import { connectToDatabase } from "../../utils/db.util";
 
+// Utility function to generate all dates between start_date and end_date
+const getDatesBetween = (startDate: string, endDate: string): string[] => {
+    const dates: string[] = [];
+    let currentDate = new Date(startDate);
+
+    while (currentDate <= new Date(endDate)) {
+        dates.push(currentDate.toISOString().split("T")[0]);
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return dates;
+};
+
 const schema = Joi.object({
-    dates: Joi.array().items(Joi.string().isoDate()).required(),
+    start_date: Joi.string().isoDate().required(),
+    end_date: Joi.string().isoDate().required(),
     start_tm: Joi.string().pattern(/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/).required(),
     end_tm: Joi.string().pattern(/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/).required(),
 });
 
-const createSlots = async (req: any, res: any) => {
+const createSlots = async (req: any, res: Response) => {
     try {
         const db = await connectToDatabase();
 
@@ -17,12 +31,15 @@ const createSlots = async (req: any, res: any) => {
             return res.status(400).send(error.message);
         }
 
-        const { dates, start_tm, end_tm } = value;
-        const user_id = req.user.id;
+        const { start_date, end_date, start_tm, end_tm } = value;
+        const user_id = req.user.id; 
 
         if (new Date(`1970-01-01T${start_tm}`) >= new Date(`1970-01-01T${end_tm}`)) {
             return res.status(400).send("Start time must be before end time");
         }
+
+        // Generate dates between start_date and end_date
+        const dates = getDatesBetween(start_date, end_date);
 
         // Construct date conditions for SQL query
         const dateConditions = dates.map((date: string) => {
