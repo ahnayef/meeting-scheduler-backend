@@ -1,6 +1,5 @@
 import { Router, Request, Response } from "express";
 import { UsersRouter } from "./user.router";
-import { CoursesRouter } from "./courses.router";
 import authMiddleware from "../middlewares/authMiddleware";
 import { NoticesRouter } from "./notices.router";
 
@@ -14,7 +13,6 @@ router.get('/health', (req: Request, res: any) => {
 });
 
 router.use('/users', UsersRouter);
-router.use('/courses', authMiddleware, CoursesRouter);
 router.use('/notices', authMiddleware, NoticesRouter);
 
 

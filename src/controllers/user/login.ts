@@ -13,7 +13,7 @@ const schema = Joi.object({
 
 const Login = async (req: any, res: any) => {
     try {
-        const db = await connectToDatabase();
+        const db = await connectToDatabase(); 
 
         const secretKey = process.env.JWT_SECRET_KEY;
 

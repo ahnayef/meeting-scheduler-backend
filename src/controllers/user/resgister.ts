@@ -24,7 +24,7 @@ const schema = Joi.object({
     photo: Joi.string().uri().required(),
 });
 
-const Register = async (req: Request, res: Response) => {
+const Register = async (req: Request, res: any) => {
     try {
         const db = await connectToDatabase();
 
