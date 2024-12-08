@@ -7,7 +7,7 @@ require('dotenv').config();
 
 const schema = Joi.object({
     role: Joi.string().valid("Host", "Guest", "Admin").required(), // Updated role options
-    identification: Joi.string().required(),
+    email: Joi.string().required(),
     password: Joi.string().required()
 });
 
@@ -27,13 +27,13 @@ const Login = async (req: any, res: any) => {
             return res.status(400).send(error.message);
         }
 
-        const { role, identification, password } = value;
+        const { role, email, password } = value;
 
         if (role === 'Guest' || role === 'Host') {
             // Check for user by email (for Host and Guest roles)
             const [rows]: any = await db.query(
                 `SELECT email FROM \`user\` WHERE email = ?`,
-                [identification]
+                [email]
             );
 
             if (rows.length === 0) {
@@ -41,7 +41,7 @@ const Login = async (req: any, res: any) => {
             } else {
                 const [user]: any = await db.query(
                     `SELECT * FROM \`user\` WHERE email = ?`,
-                    [identification]
+                    [email]
                 );
 
                 const passwordMatch = await bcrypt.compare(password, user[0].password);
@@ -73,7 +73,7 @@ const Login = async (req: any, res: any) => {
             // Admin login by email (assuming admins use email for login)
             const [rows]: any = await db.query(
                 `SELECT email FROM \`user\` WHERE email = ?`,
-                [identification]
+                [email]
             );
 
             if (rows.length === 0) {
@@ -81,7 +81,7 @@ const Login = async (req: any, res: any) => {
             } else {
                 const [user]: any = await db.query(
                     `SELECT * FROM \`user\` WHERE email = ?`,
-                    [identification]
+                    [email]
                 );
 
                 const passwordMatch = await bcrypt.compare(password, user[0].password);
