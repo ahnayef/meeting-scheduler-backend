@@ -6,12 +6,10 @@ import jwt from 'jsonwebtoken';
 require('dotenv').config();
 
 const schema = Joi.object({
-    role: Joi.string().valid("Teacher", "Student", "Admin/HOD").required(),
+    role: Joi.string().valid("Host", "Guest", "Admin").required(), // Updated role options
     identification: Joi.string().required(),
     password: Joi.string().required()
-})
-
-
+});
 
 const Login = async (req: any, res: any) => {
     try {
@@ -31,56 +29,18 @@ const Login = async (req: any, res: any) => {
 
         const { role, identification, password } = value;
 
-
-        if (role == 'Student') {
+        if (role === 'Guest' || role === 'Host') {
+            // Check for user by email (for Host and Guest roles)
             const [rows]: any = await db.query(
-                `SELECT sid FROM users WHERE sid = ?`,
+                `SELECT email FROM \`user\` WHERE email = ?`,
                 [identification]
             );
 
-            if (rows.length == 0) {
+            if (rows.length === 0) {
                 return res.status(404).send('User not found');
             } else {
                 const [user]: any = await db.query(
-                    `SELECT * FROM users WHERE sid = ?`,
-                    [identification]
-                );
-
-                const passwordMatch = await bcrypt.compare(password, user[0].password);
-
-                if (!passwordMatch) {
-                    return res.status(401).send('Password does not match');
-                }
-
-                const token = jwt.sign(
-                    { id: user[0].id, role: user[0].role, sid: user[0].sid },
-                    secretKey,
-                    { expiresIn: '1w' }
-                );
-
-                return res.status(200).json({
-                    data: {
-                        token, user: {
-                            name: user[0].name,
-                            sid: user[0].sid,
-                            role: user[0].role,
-                            department: user[0].department,
-                            session: user[0].session
-                        }
-                    }
-                });
-            }
-        } else {
-            const [rows]: any = await db.query(
-                `SELECT email FROM users WHERE email = ?`,
-                [identification]
-            );
-
-            if (rows.length == 0) {
-                return res.status(404).send('User not found');
-            } else {
-                const [user]: any = await db.query(
-                    `SELECT * FROM users WHERE email = ?`,
+                    `SELECT * FROM \`user\` WHERE email = ?`,
                     [identification]
                 );
 
@@ -91,20 +51,60 @@ const Login = async (req: any, res: any) => {
                 }
 
                 const token = jwt.sign(
-                    { id: user[0].id, role: user[0].role, email: user[0].email },
+                    { id: user[0].user_id, role: user[0].role, email: user[0].email },
                     secretKey,
-                    { expiresIn: '1d' }
+                    { expiresIn: '1w' }
                 );
 
                 return res.status(200).json({
                     data: {
-                        token, user: {
+                        token,
+                        user: {
                             name: user[0].name,
-                            sid: user[0].sid,
+                            email: user[0].email,
                             role: user[0].role,
-                            department: user[0].department,
-                            session: user[0].session,
-                            disabled: user[0].disabled
+                            bio: user[0].bio,
+                            photo: user[0].photo,
+                        }
+                    }
+                });
+            }
+        } else if (role === 'Admin') {
+            // Admin login by email (assuming admins use email for login)
+            const [rows]: any = await db.query(
+                `SELECT email FROM \`user\` WHERE email = ?`,
+                [identification]
+            );
+
+            if (rows.length === 0) {
+                return res.status(404).send('User not found');
+            } else {
+                const [user]: any = await db.query(
+                    `SELECT * FROM \`user\` WHERE email = ?`,
+                    [identification]
+                );
+
+                const passwordMatch = await bcrypt.compare(password, user[0].password);
+
+                if (!passwordMatch) {
+                    return res.status(401).send('Wrong password');
+                }
+
+                const token = jwt.sign(
+                    { id: user[0].user_id, role: user[0].role, email: user[0].email },
+                    secretKey,
+                    { expiresIn: '1w' }
+                );
+
+                return res.status(200).json({
+                    data: {
+                        token,
+                        user: {
+                            name: user[0].name,
+                            email: user[0].email,
+                            role: user[0].role,
+                            bio: user[0].bio,
+                            photo: user[0].photo,
                         }
                     }
                 });
