@@ -17,7 +17,7 @@ router.get('/health', (req: Request, res: any) => {
 router.use('/users', UsersRouter);
 router.use('/notices', authMiddleware, NoticesRouter);
 router.use('/slots', authMiddleware, SlotRouter);
-router.use('/booking ', authMiddleware, bookingRouter);
+router.use('/booking', authMiddleware, bookingRouter);
 
 
 export { router };
