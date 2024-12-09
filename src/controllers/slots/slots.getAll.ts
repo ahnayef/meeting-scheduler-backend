@@ -15,7 +15,7 @@ const getSlots = async (req: any, res: any) => {
         // Query Execution
         const [slots]: any = await db.query(
             `SELECT slot_id, user_id, date, start_tm, end_tm, is_booked 
-            FROM slot WHERE user_id = ? AND is_booked NOT true`,[user_id]
+            FROM slot WHERE user_id = ? AND is_booked = FALSE`,[user_id]
         );
 
         // const userName: string = = `SELECT name from user`
