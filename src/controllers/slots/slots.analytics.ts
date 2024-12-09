@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { connectToDatabase } from "../../utils/db.util";
 import json2csv from "json2csv";
 
-const HostAnalytics = async (req: Request, res: Response) => {
+const HostAnalytics = async (req: any, res: any) => {
     try {
         const db = await connectToDatabase();
         const hostId = req.user?.user_id; // Assuming user ID is available in req.user from authentication middleware
