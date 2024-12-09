@@ -33,12 +33,6 @@ const UpdateSlot = async (req: any, res: any) => {
             return res.status(400).send('This slot is already booked and cannot be updated');
         }
 
-        // Check if there are any bookings for this slot
-        const [bookings]: any = await db.query('SELECT * FROM booking WHERE slot_id = ?', [slot_id]);
-
-        if (bookings.length > 0) {
-            return res.status(400).send('This slot has existing bookings and cannot be updated');
-        }
 
         // Update the slot with the new values
         await db.query(
