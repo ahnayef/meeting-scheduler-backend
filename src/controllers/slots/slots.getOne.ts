@@ -10,7 +10,7 @@ const getSingleSlot = async (req: any, res: any) => {
 
         // Query Execution
         const [slot]: any = await db.query(
-            `SELECT date, start_tm, end_tm FROM slot WHERE slot_id = ?`, [id]
+            `SELECT slot_id, date, start_tm, end_tm FROM slot WHERE slot_id = ?`, [id]
         );
 
         return res.status(200).json({
