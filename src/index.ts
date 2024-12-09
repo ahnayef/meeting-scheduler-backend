@@ -12,7 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const clientOrigin = process.env.CLIENT_ORIGIN;
 app.use(cors({
-    origin: clientOrigin, //Only our client
+    origin: '*', //Only our client
     credentials: true,
 }));
 

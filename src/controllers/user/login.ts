@@ -6,16 +6,13 @@ import jwt from 'jsonwebtoken';
 require('dotenv').config();
 
 const schema = Joi.object({
-    role: Joi.string().valid("Teacher", "Student", "Admin/HOD").required(),
-    identification: Joi.string().required(),
+    email: Joi.string().required(),
     password: Joi.string().required()
-})
-
-
+});
 
 const Login = async (req: any, res: any) => {
     try {
-        const db = await connectToDatabase();
+        const db = await connectToDatabase(); 
 
         const secretKey = process.env.JWT_SECRET_KEY;
 
@@ -29,86 +26,46 @@ const Login = async (req: any, res: any) => {
             return res.status(400).send(error.message);
         }
 
-        const { role, identification, password } = value;
+        const { email, password } = value;
 
+        const [rows]: any = await db.query(
+            `SELECT email FROM \`user\` WHERE email = ?`,
+            [email]
+        );
 
-        if (role == 'Student') {
-            const [rows]: any = await db.query(
-                `SELECT sid FROM users WHERE sid = ?`,
-                [identification]
-            );
-
-            if (rows.length == 0) {
-                return res.status(404).send('User not found');
-            } else {
-                const [user]: any = await db.query(
-                    `SELECT * FROM users WHERE sid = ?`,
-                    [identification]
-                );
-
-                const passwordMatch = await bcrypt.compare(password, user[0].password);
-
-                if (!passwordMatch) {
-                    return res.status(401).send('Password does not match');
-                }
-
-                const token = jwt.sign(
-                    { id: user[0].id, role: user[0].role, sid: user[0].sid },
-                    secretKey,
-                    { expiresIn: '1h' }
-                );
-
-                return res.status(200).json({
-                    data: {
-                        token, user: {
-                            name: user[0].name,
-                            sid: user[0].sid,
-                            role: user[0].role,
-                            department: user[0].department,
-                            session: user[0].session
-                        }
-                    }
-                });
-            }
+        if (rows.length === 0) {
+            return res.status(404).send('User not found');
         } else {
-            const [rows]: any = await db.query(
-                `SELECT email FROM users WHERE email = ?`,
-                [identification]
+            const [user]: any = await db.query(
+                `SELECT * FROM \`user\` WHERE email = ?`,
+                [email]
             );
 
-            if (rows.length == 0) {
-                return res.status(404).send('User not found');
-            } else {
-                const [user]: any = await db.query(
-                    `SELECT * FROM users WHERE email = ?`,
-                    [identification]
-                );
+            const passwordMatch = await bcrypt.compare(password, user[0].password);
 
-                const passwordMatch = await bcrypt.compare(password, user[0].password);
-
-                if (!passwordMatch) {
-                    return res.status(401).send('Wrong password');
-                }
-
-                const token = jwt.sign(
-                    { id: user[0].id, role: user[0].role, email: user[0].email },
-                    secretKey,
-                    { expiresIn: '1d' }
-                );
-
-                return res.status(200).json({
-                    data: {
-                        token, user: {
-                            name: user[0].name,
-                            sid: user[0].sid,
-                            role: user[0].role,
-                            department: user[0].department,
-                            session: user[0].session,
-                            disabled: user[0].disabled
-                        }
-                    }
-                });
+            if (!passwordMatch) {
+                return res.status(401).send('Wrong password');
             }
+
+            const token = jwt.sign(
+                { id: user[0].user_id, role: user[0].role, email: user[0].email },
+                secretKey,
+                { expiresIn: '1w' }
+            );
+
+            return res.status(200).json({
+                data: {
+                    token,
+                    user: {
+                        name: user[0].name,
+                        user_id: user[0].user_id,
+                        email: user[0].email,
+                        role: user[0].role,
+                        bio: user[0].bio,
+                        photo: user[0].photo,
+                    }
+                }
+            });
         }
     } catch (err) {
         console.error(err);
