@@ -14,7 +14,7 @@ const getSingleSlot = async (req: any, res: any) => {
         );
 
         return res.status(200).json({
-            data: { slot },
+            data: slot[0],
         });
     } catch (error) {
         console.error(error);
