@@ -79,6 +79,7 @@ const Register = async (req: Request, res: any) => {
                 token,
                 user: {
                     name: user[0].name,
+                    id: user[0].user_id,
                     email: user[0].email,
                     role: user[0].role,
                     bio: user[0].bio,
