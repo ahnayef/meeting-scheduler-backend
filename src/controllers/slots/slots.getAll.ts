@@ -14,14 +14,14 @@ const getSlots = async (req: any, res: any) => {
 
         // Query Execution
         const [slots]: any = await db.query(
-            `SELECT slot_id, user_id, date, start_tm, end_tm, is_booked 
-            FROM slot WHERE user_id = ? AND is_booked = FALSE`,[user_id]
+            `SELECT slot.slot_id, slot.user_id, slot.date, slot.start_tm, slot.end_tm, slot.is_booked
+            FROM slot WHERE slot.user_id = ? AND is_booked = FALSE`,[user_id]
         );
 
 
         const [bookedSlots]: any = await db.query(
-            `SELECT slot_id, user_id, date, start_tm, end_tm, is_booked 
-            FROM slot WHERE user_id = ? AND is_booked = TRUE`,[user_id]
+            `SELECT slot.slot_id, slot.user_id, slot.date, slot.start_tm, slot.end_tm, slot.is_booked, booking.user_id as bookedBy
+            FROM slot INNER JOIN booking ON slot.slot_id = booking.slot_id  WHERE slot.user_id = ? AND is_booked = TRUE`,[user_id]
         );
 
         // const userName: string = = `SELECT name from user`
