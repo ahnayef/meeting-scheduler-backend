@@ -23,7 +23,7 @@ const querySchema = Joi.object({
 });
 
 // Middleware to check if the user is Admin
-const isAdmin = (req: Request, res: Response, next: Function) => {
+const isAdmin = (req: any, res: any, next: Function) => {
     const token = req.header("Authorization")?.replace("Bearer ", "");
     if (!token) {
         return res.status(403).send("Access denied.");
@@ -40,7 +40,7 @@ const isAdmin = (req: Request, res: Response, next: Function) => {
     }
 };
 
-const getUsers = async (req: Request, res: Response) => {
+const getUsers = async (req: any, res: any) => {
     try {
         const db = await connectToDatabase();
 
