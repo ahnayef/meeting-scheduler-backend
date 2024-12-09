@@ -8,7 +8,7 @@ import getSlots from "../controllers/slots/slots.getAll";
 const SlotRouter = Router();
 
 SlotRouter.post('/create', CreateSlot);
-SlotRouter.get('/update', UpdateSlot);
+SlotRouter.put('/update', UpdateSlot);
 SlotRouter.delete('/delete/:id', deleteSlot);
 SlotRouter.get('/getall', getSlots);
 
