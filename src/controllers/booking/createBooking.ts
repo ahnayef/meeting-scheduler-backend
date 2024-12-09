@@ -33,13 +33,6 @@ const CreateBooking = async (req:any, res:any) => {
             return res.status(400).send("Slot is already booked.");
         }
 
-        // Step 3: Check if the user is trying to book a slot that belongs to another host
-        const [host]: any = await db.query("SELECT * FROM user WHERE user_id = ?", [slotDetails.user_id]);
-
-        if (host.length === 0 || host[0].user_id !== user_id) {
-            return res.status(403).send("You can only book slots owned by you.");
-        }
-
         // Step 4: Create the booking entry
         await db.query("INSERT INTO booking (user_id, slot_id) VALUES (?, ?)", [
             user_id,
