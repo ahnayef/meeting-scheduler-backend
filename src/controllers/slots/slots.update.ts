@@ -22,7 +22,7 @@ const UpdateSlot = async (req: any, res: any) => {
         const { slot_id, start_tm, end_tm, date } = value;
 
         // Check if the slot exists
-        const [slot]: any = await db.query('SELECT * FROM slots WHERE slot_id = ?', [slot_id]);
+        const [slot]: any = await db.query('SELECT * FROM slot WHERE slot_id = ?', [slot_id]);
 
         if (slot.length === 0) {
             return res.status(404).send('Slot not found');
@@ -34,7 +34,7 @@ const UpdateSlot = async (req: any, res: any) => {
         }
 
         // Check if there are any bookings for this slot
-        const [bookings]: any = await db.query('SELECT * FROM bookings WHERE slot_id = ?', [slot_id]);
+        const [bookings]: any = await db.query('SELECT * FROM booking WHERE slot_id = ?', [slot_id]);
 
         if (bookings.length > 0) {
             return res.status(400).send('This slot has existing bookings and cannot be updated');
@@ -42,7 +42,7 @@ const UpdateSlot = async (req: any, res: any) => {
 
         // Update the slot with the new values
         await db.query(
-            'UPDATE slots SET date = ?, start_tm = ?, end_tm = ? WHERE slot_id = ?',
+            'UPDATE slot SET date = ?, start_tm = ?, end_tm = ? WHERE slot_id = ?',
             [date, start_tm, end_tm, slot_id]
         );
 
