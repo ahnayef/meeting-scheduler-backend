@@ -23,22 +23,22 @@ const querySchema = Joi.object({
 });
 
 // Middleware to check if the user is Admin
-const isAdmin = (req: any, res: any, next: Function) => {
-    const token = req.header("Authorization")?.replace("Bearer ", "");
-    if (!token) {
-        return res.status(403).send("Access denied.");
-    }
+// const isAdmin = (req: any, res: any, next: Function) => {
+//     const token = req.header("Authorization")?.replace("Bearer ", "");
+//     if (!token) {
+//         return res.status(403).send("Access denied.");
+//     }
 
-    try {
-        const decoded: any = jwt.verify(token, process.env.JWT_SECRET_KEY || '');
-        if (decoded.role !== 'Admin') {
-            return res.status(403).send("Access denied.");
-        }
-        next();
-    } catch (error) {
-        return res.status(401).send("Invalid token.");
-    }
-};
+//     try {
+//         const decoded: any = jwt.verify(token, process.env.JWT_SECRET_KEY || '');
+//         if (decoded.role !== 'Admin') {
+//             return res.status(403).send("Access denied.");
+//         }
+//         next();
+//     } catch (error) {
+//         return res.status(401).send("Invalid token.");
+//     }
+// };
 
 const getUsers = async (req: any, res: any) => {
     try {
@@ -98,4 +98,5 @@ const getUsers = async (req: any, res: any) => {
     }
 };
 
-export default [isAdmin, getUsers];
+export default getUsers;
+// export default [isAdmin, getUsers];
