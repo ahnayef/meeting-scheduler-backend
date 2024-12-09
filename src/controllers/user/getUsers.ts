@@ -38,7 +38,7 @@ const getUsers = async (req: any, res: any) => {
 
 
         // Fetch users
-        const users = await db.query(query, [role]);
+        const [users]: any = await db.query(query, [role]);
 
 
         return res.status(200).json({
